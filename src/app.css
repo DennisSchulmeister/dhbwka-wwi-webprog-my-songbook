@@ -31,14 +31,10 @@
  * andere Rechte wie Persönlichkeits- und Datenschutzrechte zu beachten
  * sein, die Ihre Nutzung des Materials entsprechend beschränken.
  */
-"use strict";
 
-import stylesheet from "./index.css";
-import App from "./app.js";
-
-// Erst loslaufen, wenn das Document Object Modul bereit ist
-window.addEventListener("load", () => {
-    // Anwendung starten
-    let app = new App();
-    app.start();
-});
+/*
+ * Dieses Stylesheet darf nur Selektoren beinhalten, die mit #app beginnen.
+ * Denn wir wollen nicht, dass hier Eigenschaften aus anderen Bereichen der
+ * Anwendung überschrieben werden.
+ */
+#app {}
