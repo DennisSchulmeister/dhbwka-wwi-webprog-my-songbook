@@ -62,24 +62,13 @@ class SongDisplayEdit {
      * Methode App._switchVisibleContent()
      */
     onShow() {
-        // Anzuzeigende HTML-Elemente ermitteln
         let section = document.querySelector("#song-display-edit").cloneNode(true);
 
-        let content = {
+        return {
             className: "song-display-edit",
             topbar: section.querySelectorAll("header > *"),
             main: section.querySelectorAll("main > *"),
         };
-
-        // Event Handler registrieren
-        let overviewItem = section.querySelector("header .item.overview");
-
-        overviewItem.addEventListener("click", () => {
-            this._app.showSongOverview();
-        })
-
-        // Ergebnis zurückliefern
-        return content;
     }
 
     /**

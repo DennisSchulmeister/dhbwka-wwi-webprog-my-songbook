@@ -35,6 +35,7 @@
 
 import stylesheet from "./app.css";
 
+import Navigo from "navigo/lib/navigo.js";
 import SongDisplayEdit from "./song-display-edit/song-display-edit.js";
 import SongOverview from "./song-overview/song-overview.js";
 
@@ -49,13 +50,42 @@ class App {
     constructor() {
         this._title = "My Songbook";
         this._currentView = null;
+
+        // Single Page Router aufsetzen
+        this._router = new Navigo();
+        this._currentUrl = "";
+        this._navAborted = false;
+
+        this._router.on({
+            "*":                       () => this.showSongOverview(),
+            "/song/new/":              () => this.showSongDisplayEdit("", "new"),
+            "/song/display/:id/":  params => this.showSongDisplayEdit(params.id, "display"),
+            "/song/edit/:id/":     params => this.showSongDisplayEdit(params.id, "edit"),
+        });
+
+        this._router.hooks({
+            after: (params) => {
+                if (!this._navAborted) {
+                    // Navigation durchführen, daher die neue URL merken
+                    this._currentUrl = this._router.lastRouteResolved().url;
+                } else {
+                    // Navigation abbrechen, daher die URL in der Adresszeile
+                    // auf den alten Wert der bisherigen View zurücksetzen
+                    this._router.pause(true);
+                    this._router.navigate(this._currentUrl);
+                    this._router.pause(false);
+
+                    this._navAborted = false;
+                }
+            }
+        });
     }
 
     /**
      * Ab hier beginnt die Anwendung zu laufen.
      */
     start() {
-        this.showSongOverview();
+        this._router.resolve();
     }
 
     /**
@@ -95,10 +125,15 @@ class App {
         // false zurückliefert. Dadurch erhält sie die Möglichkeit, den Anwender
         // zum Beispiel zu fragen, ob er ungesicherte Daten speichern will,
         // bevor er die Seite verlässt.
-        let goon = () => this._switchVisibleView(view);
+        let newUrl = this._router.lastRouteResolved().url;
+        let goon = () => {
+            // ?goon an die URL hängen, weil der Router sonst nicht weiternavigiert
+            this._router.navigate(newUrl + "?goon");
+        }
 
         // Aktuelle View fragen, ob eine neue View aufgerufen werden darf
         if (this._currentView && !this._currentView.onLeave(goon)) {
+            this._navAborted = true;
             return false;
         }
 
@@ -163,6 +198,9 @@ class App {
                 main.appendChild(element);
             });
         }
+
+        // Navigo an die Links in der View binden
+        this._router.updatePageLinks();
     }
 }
 
