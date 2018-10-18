@@ -119,7 +119,7 @@ class App {
      * @param  {Object} view View-Objekt mit einer onShow()-Methode
      * @return {Boolean} Flag, ob die neue Seite aufgerufen werden konnte
      */
-    _switchVisibleView(view) {
+    async _switchVisibleView(view) {
         // Callback, mit dem die noch sichtbare View den Seitenwechsel zu einem
         // späteren Zeitpunkt fortführen kann, wenn sie in der Methode onLeave()
         // false zurückliefert. Dadurch erhält sie die Möglichkeit, den Anwender
@@ -132,16 +132,20 @@ class App {
         }
 
         // Aktuelle View fragen, ob eine neue View aufgerufen werden darf
-        if (this._currentView && !this._currentView.onLeave(goon)) {
-            this._navAborted = true;
-            return false;
+        if (this._currentView) {
+            let goonAllowed = await this._currentView.onLeave(goon);
+
+            if (!goonAllowed) {
+                this._navAborted = true;
+                return false;
+            }
         }
 
         // Alles klar, aktuelle View nun wechseln
         document.title = `${this._title} – ${view.title}`;
 
         this._currentView = view;
-        this._switchVisibleContent(view.onShow());
+        this._switchVisibleContent(await view.onShow());
         return true;
     }
 

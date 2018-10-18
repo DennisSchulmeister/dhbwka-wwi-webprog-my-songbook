@@ -61,7 +61,7 @@ class SongDisplayEdit {
      * @return {Object} Darzustellende DOM-Elemente gemäß Beschreibung der
      * Methode App._switchVisibleContent()
      */
-    onShow() {
+    async onShow() {
         let section = document.querySelector("#song-display-edit").cloneNode(true);
 
         return {
@@ -80,7 +80,7 @@ class SongDisplayEdit {
      * Zeitpunkt fortzuführen, falls wir hier false zurückgeben
      * @return {Boolean} true, wenn der Seitenwechsel erlaubt ist, sonst false
     */
-    onLeave(goon) {
+    async onLeave(goon) {
         return true;
     }
 

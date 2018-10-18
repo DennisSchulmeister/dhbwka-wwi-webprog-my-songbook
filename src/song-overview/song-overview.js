@@ -46,49 +46,6 @@ class SongOverview {
      */
     constructor(app) {
         this._app = app;
-
-        // Test der Datenbankklasse für Songtexte
-        let test = async () => {
-            let songtexts = new Database.Songtexts();
-            await songtexts.clear();
-
-            let songs = await songtexts.search();
-            console.log("Alle Songs:", songs);
-
-            if (songs.length === 0) {
-                console.log("Bisher noch keine Songs vorhanden, lege deshalb Testdaten an");
-
-                await Promise.all([
-                    songtexts.saveNew({
-                        artist: "Queen",
-                        title: "I Want To Break Free",
-                        format: "html",
-                        data: "HTML-Code für <b>I Want To Break Free</b> von <b>Queen</b>",
-                    }),
-                    songtexts.saveNew({
-                        artist: "Queen",
-                        title: "Radio Ga Ga",
-                        format: "html",
-                        data: "HTML-Code für <b>Radio Ga Ga</b> von <b>Queen</b>",
-                    }),
-                    songtexts.saveNew({
-                        artist: "Michael Jackson",
-                        title: "Billie Jean",
-                        format: "html",
-                        data: "HTML-Code für <b>Billie Jean</b> von <b>Michael Jackson</b>",
-                    }),
-                ]);
-
-                let songs = await songtexts.search();
-                console.log("Gespeicherte Songs:", songs);
-            }
-
-            songs = await songtexts.search("queen");
-            console.log('Suche nach dem Begriff "queen":', songs);
-        }
-
-        test();
-        // Ende des Testcodes
     }
 
     /**
@@ -100,7 +57,7 @@ class SongOverview {
      * @return {Object} Darzustellende DOM-Elemente gemäß Beschreibung der
      * Methode App._switchVisibleContent()
      */
-    onShow() {
+    async onShow() {
         let section = document.querySelector("#song-overview").cloneNode(true);
 
         return {
@@ -119,7 +76,7 @@ class SongOverview {
      * Zeitpunkt fortzuführen, falls wir hier false zurückgeben
      * @return {Boolean} true, wenn der Seitenwechsel erlaubt ist, sonst false
      */
-    onLeave(goon) {
+    async onLeave(goon) {
         return true;
     }
 
