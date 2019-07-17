@@ -48,8 +48,13 @@ class SongOverview {
         this._app = app;
 
         // Suche und Sortierung
-        this._order = "title";
-        this._query = "";
+        this._order = "";
+        this._sort = "";
+        this._searchTimeout = null;
+
+        this._sortButtons = null;
+        this._searchField = null;
+        this._listElement = null;
     }
 
     /**
@@ -64,11 +69,40 @@ class SongOverview {
     async onShow() {
         let section = document.querySelector("#song-overview").cloneNode(true);
 
-        let order = "title";
-        let query = "";
+        this._sortButtons = section.querySelectorAll("header .cmd-sort");
+        this._searchField = section.querySelector("header .search");
+        this._listElement = section.querySelector("main > ul");
 
-        let songs = await this._searchSongs(query, order);
-        this._renderList(songs, order, section.querySelector("main > ul"));
+        this._searchAndUpdateView("", "title");
+
+        // Event Listener zum Sortieren der Liste
+        this._sortButtons.forEach(element => {
+            element.addEventListener("click", event => {
+                this._searchAndUpdateView(this._query, element.dataset.sortBy);
+                event.preventDefault();
+            });
+        });
+
+        // Event Listener zum Suchen von Songs
+        this._searchField.addEventListener("keyup", event => {
+            if (event.key === "Enter") {
+                // Bei Enter sofort suchen
+                this._searchAndUpdateView(this._searchField.value, this._sort);
+
+                if (this._searchTimeout) {
+                    window.clearTimeout(this._searchTimeout);
+                    this._searchTimeout = null;
+                }
+            } else {
+                // Bei sonstigem Tastendruck nur alle halbe Sekunde suchen
+                if (!this._searchTimeout) {
+                    this._searchTimeout = window.setTimeout(() => {
+                        this._searchAndUpdateView(this._searchField.value, this._sort);
+                        this._searchTimeout = null;
+                    }, 500);
+                }
+            }
+        });
 
         return {
             className: "song-overview",
@@ -247,6 +281,38 @@ class SongOverview {
                 liSong.appendChild(divTitle);
                 liSong.appendChild(divArtist);
             });
+        }
+    }
+
+    /**
+     * Diese Methode umhüllt die beiden Methoden _searchSongs() und
+     * _renderList(), um die Liste der darzustellenden Songs zu ermitteln
+     * und anzuzeigen. Dabei werden auch die anderen Inhalte der Seite
+     * wie die Toolbar oder das Suchfeld aktualisiert.
+     *
+     * @param  {String} query Suchbegriff
+     * @param  {String} sort Sortierung und Gruppierung
+     */
+    async _searchAndUpdateView(query, sort) {
+        // Songs suchen und anzeigen
+        this._query = query;
+        this._sort = sort;
+
+        let songs = await this._searchSongs(query, sort);
+        this._renderList(songs, sort, this._listElement);
+
+        // Sortierbuttons in der Toolbar umschalten
+        this._sortButtons.forEach(element => {
+            if (element.dataset.sortBy === sort) {
+                element.classList.add("hidden");
+            } else {
+                element.classList.remove("hidden");
+            }
+        });
+
+        // Text im Suchfeld aktualisieren
+        if (!this._searchField.value === query) {
+            this._searchField.value = query;
         }
     }
 }
