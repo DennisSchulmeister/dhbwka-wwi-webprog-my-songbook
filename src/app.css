@@ -157,6 +157,11 @@
         width: auto;
     }
 
+    /* Menü-Icon ausblenden */
+    #app header .menu-icon {
+        display: none;
+    }
+
     /* Nur den Bereich unterhalb der Toolbar scrollen */
     #app {
         display: flex;
